@@ -10,11 +10,11 @@ app.use(express.json());
 
 // Importar rutas
 const authRoutes = require('./routes/auth');
-const userRoutes = require('./routes/users');
+const taskRoutes = require('./routes/tasks');
 
 // Usar rutas
 app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
+app.use('/api/tasks', taskRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {

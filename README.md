@@ -1,14 +1,16 @@
-# Sistema CRUD con Autenticación JWT
+# 📝 Lista de Tareas Personal (To-Do List)
 
-Sistema completo con API REST en Express.js y frontend en React que maneja autenticación JWT y un CRUD de usuarios. Soporta PostgreSQL y MongoDB con cambio dinámico entre bases de datos.
+Sistema completo con API REST en Express.js y frontend en React para gestionar tareas personales. Cada usuario tiene acceso solo a sus propias tareas. Soporta PostgreSQL y MongoDB con cambio dinámico entre bases de datos.
 
 ## 🚀 Características
 
 - ✅ Autenticación con JWT (Login y Signup)
-- ✅ CRUD completo de usuarios
+- ✅ CRUD completo de tareas personales (Crear, Leer, Actualizar, Eliminar)
+- ✅ Cada usuario ve solo SUS tareas
+- ✅ Campos: Título, Descripción, Fecha límite, Estado (completado/pendiente)
 - ✅ Soporte para PostgreSQL y MongoDB
 - ✅ Switch en el frontend para cambiar entre bases de datos
-- ✅ Interfaz moderna y responsiva
+- ✅ Interfaz moderna con tarjetas de tareas
 - ✅ Protección de rutas con middleware
 
 ## 📋 Requisitos Previos
@@ -130,11 +132,13 @@ La aplicación se abrirá en `http://localhost:3000`
 
 3. **Login**: Inicia sesión con tus credenciales
 
-4. **Panel de Control**: Una vez autenticado, podrás:
-   - Ver todos los usuarios
-   - Editar usuarios
-   - Eliminar usuarios
-   - Ver qué base de datos estás usando
+4. **Gestión de Tareas**: Una vez autenticado, podrás:
+   - ➕ **Crear nuevas tareas** con título, descripción y fecha límite
+   - ✅ **Marcar tareas como completadas** con un simple click
+   - ✏️ **Editar tus tareas** en cualquier momento
+   - 🗑️ **Eliminar tareas** que ya no necesites
+   - 👁️ **Ver solo TUS tareas** (las tareas son privadas para cada usuario)
+   - 🔄 Ver qué base de datos estás usando
 
 ## 📁 Estructura del Proyecto
 
@@ -142,27 +146,29 @@ La aplicación se abrirá en `http://localhost:3000`
 CRUD/
 ├── backend/
 │   ├── config/
-│   │   └── database.js       # Configuración de bases de datos
+│   │   └── database.js          # Configuración de bases de datos
 │   ├── middleware/
-│   │   └── auth.js            # Middleware de autenticación JWT
+│   │   └── auth.js              # Middleware de autenticación JWT
 │   ├── models/
-│   │   ├── userMongo.js       # Modelo de usuario para MongoDB
-│   │   └── userPostgres.js    # Modelo de usuario para PostgreSQL
+│   │   ├── userMongo.js         # Modelo de usuario para MongoDB
+│   │   ├── userPostgres.js      # Modelo de usuario para PostgreSQL
+│   │   ├── taskMongo.js         # Modelo de tarea para MongoDB
+│   │   └── taskPostgres.js      # Modelo de tarea para PostgreSQL
 │   ├── routes/
-│   │   ├── auth.js            # Rutas de autenticación
-│   │   └── users.js           # Rutas CRUD de usuarios
-│   ├── .env                   # Variables de entorno
-│   ├── .dockerignore          # Archivos ignorados por Docker
-│   ├── Dockerfile             # Configuración Docker del backend
+│   │   ├── auth.js              # Rutas de autenticación
+│   │   └── tasks.js             # Rutas CRUD de tareas
+│   ├── .env                     # Variables de entorno
+│   ├── .dockerignore            # Archivos ignorados por Docker
+│   ├── Dockerfile               # Configuración Docker del backend
 │   ├── package.json
-│   └── server.js              # Punto de entrada del servidor
+│   └── server.js                # Punto de entrada del servidor
 │
 ├── frontend/
 │   ├── public/
 │   │   └── index.html
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── Dashboard.js        # Panel principal con CRUD
+│   │   │   ├── Dashboard.js        # Panel de tareas con CRUD
 │   │   │   ├── DatabaseSwitch.js   # Switch de bases de datos
 │   │   │   ├── DatabaseSwitch.css
 │   │   │   ├── Login.js            # Componente de login
@@ -171,11 +177,11 @@ CRUD/
 │   │   ├── App.css
 │   │   ├── index.js
 │   │   └── index.css
-│   ├── .dockerignore          # Archivos ignorados por Docker
-│   ├── Dockerfile             # Configuración Docker del frontend
+│   ├── .dockerignore            # Archivos ignorados por Docker
+│   ├── Dockerfile               # Configuración Docker del frontend
 │   └── package.json
 │
-└── docker-compose.yml         # Orquestación de todos los servicios
+└── docker-compose.yml           # Orquestación de todos los servicios
 ```
 
 ## 🔐 API Endpoints
@@ -201,12 +207,19 @@ CRUD/
   }
   ```
 
-### Usuarios (Requieren autenticación)
+### Tareas (Requieren autenticación)
 
-- `GET /api/users` - Obtener todos los usuarios
-- `GET /api/users/:id` - Obtener usuario por ID
-- `PUT /api/users/:id` - Actualizar usuario
-- `DELETE /api/users/:id` - Eliminar usuario
+- `GET /api/tasks` - Obtener todas las tareas del usuario
+- `POST /api/tasks` - Crear una nueva tarea
+  ```json
+  {
+    "title": "Comprar leche",
+    "description": "Ir al supermercado",
+    "dueDate": "2025-10-30"
+  }
+  ```
+- `PUT /api/tasks/:id` - Actualizar una tarea
+- `DELETE /api/tasks/:id` - Eliminar una tarea
 
 **Header requerido:**
 ```
@@ -237,11 +250,14 @@ Authorization: Bearer <token>
 
 ## 📝 Notas
 
+- **Privacidad**: Cada usuario solo puede ver y gestionar sus propias tareas
 - El switch de base de datos permite cambiar entre PostgreSQL y MongoDB
 - Cada usuario se registra en la base de datos seleccionada
 - El token JWT almacena qué base de datos está usando el usuario
 - Las contraseñas se hashean con bcrypt antes de almacenarse
 - Los tokens expiran en 24 horas
+- Las tareas se vinculan automáticamente al usuario autenticado
+- Validaciones simples: solo el título es obligatorio
 
 ## 🤝 Contribuciones
 

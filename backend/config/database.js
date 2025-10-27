@@ -20,9 +20,10 @@ const pgPool = new Pool({
   password: process.env.PG_PASSWORD,
 });
 
-// Crear tabla de usuarios en PostgreSQL si no existe
+// Crear tablas en PostgreSQL si no existen
 const initPostgresDB = async () => {
   try {
+    // Tabla de usuarios
     await pgPool.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
@@ -32,7 +33,21 @@ const initPostgresDB = async () => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    console.log('PostgreSQL conectado y tabla usuarios creada');
+    
+    // Tabla de tareas
+    await pgPool.query(`
+      CREATE TABLE IF NOT EXISTS tasks (
+        id SERIAL PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        description TEXT,
+        due_date DATE,
+        completed BOOLEAN DEFAULT FALSE,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    
+    console.log('PostgreSQL conectado y tablas creadas');
   } catch (error) {
     console.error('Error inicializando PostgreSQL:', error);
   }
