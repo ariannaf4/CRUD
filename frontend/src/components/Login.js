@@ -21,7 +21,7 @@ function Login({ onLogin, onToggle, dbType }) {
 
       onLogin(response.data.token, response.data.user, response.data.dbType);
     } catch (err) {
-      setError(err.response?.data?.message || 'Error al iniciar sesión');
+      setError(err.response?.data?.message || 'credenciales inválidas');
     } finally {
       setLoading(false);
     }

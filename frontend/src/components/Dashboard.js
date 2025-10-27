@@ -142,13 +142,13 @@ function Dashboard({ token, currentUser, dbType, onLogout }) {
     <div className="dashboard">
       <div className="dashboard-header">
         <div>
-          <h1>📝 Mis Tareas</h1>
+          <h1>Mis Tareas</h1>
           <span className={`db-indicator db-${dbType}`}>
             {dbType === 'mongodb' ? 'MongoDB' : 'PostgreSQL'}
           </span>
         </div>
         <div className="user-info">
-          <span>👋 {currentUser.username}</span>
+          <span>{currentUser.username}</span>
           <button onClick={onLogout} className="btn btn-danger">
             Cerrar Sesión
           </button>
@@ -159,7 +159,7 @@ function Dashboard({ token, currentUser, dbType, onLogout }) {
 
       <div style={{ marginBottom: '20px' }}>
         <button onClick={() => openModal()} className="btn btn-primary">
-          ➕ Nueva Tarea
+          + Nueva Tarea
         </button>
       </div>
 
@@ -186,14 +186,14 @@ function Dashboard({ token, currentUser, dbType, onLogout }) {
                 <p className="task-description">{task.description}</p>
               )}
               {(task.due_date || task.dueDate) && (
-                <p className="task-date">📅 {formatDate(task.due_date || task.dueDate)}</p>
+                <p className="task-date">{formatDate(task.due_date || task.dueDate)}</p>
               )}
               <div className="task-actions">
                 <button onClick={() => openModal(task)} className="btn-small btn-edit">
-                  ✏️ Editar
+                  Editar
                 </button>
                 <button onClick={() => handleDelete(task._id || task.id)} className="btn-small btn-delete">
-                  🗑️ Eliminar
+                  Eliminar
                 </button>
               </div>
             </div>

@@ -51,6 +51,8 @@
 
 .db-icon {
   font-size: 32px;
+  font-weight: bold;
+  color: #667eea;
 }
 
 .db-name {

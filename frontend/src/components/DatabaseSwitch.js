@@ -12,14 +12,14 @@ function DatabaseSwitch({ dbType, onDbChange }) {
           className={`switch-option ${dbType === 'mongodb' ? 'active mongodb' : ''}`}
           onClick={() => onDbChange('mongodb')}
         >
-          <span className="db-icon">🍃</span>
+          <span className="db-icon">M</span>
           <span className="db-name">MongoDB</span>
         </button>
         <button
           className={`switch-option ${dbType === 'postgres' ? 'active postgres' : ''}`}
           onClick={() => onDbChange('postgres')}
         >
-          <span className="db-icon">🐘</span>
+          <span className="db-icon">P</span>
           <span className="db-name">PostgreSQL</span>
         </button>
       </div>
