@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import DatabaseSwitch from './DatabaseSwitch';
 
-function Dashboard({ token, currentUser, dbType, onLogout }) {
+function Dashboard({ token, currentUser, onLogout }) {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
+  const [selectedDbType, setSelectedDbType] = useState('mongodb');
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -22,9 +24,7 @@ function Dashboard({ token, currentUser, dbType, onLogout }) {
     try {
       setLoading(true);
       const response = await axios.get('http://localhost:5000/api/tasks', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
       setTasks(response.data.tasks);
       setError('');
@@ -68,24 +68,17 @@ function Dashboard({ token, currentUser, dbType, onLogout }) {
     try {
       if (editingTask) {
         const taskId = editingTask._id || editingTask.id;
+        const dbType = editingTask.dbType;
         await axios.put(
-          `http://localhost:5000/api/tasks/${taskId}`,
+          `http://localhost:5000/api/tasks/${taskId}/${dbType}`,
           formData,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
       } else {
         await axios.post(
           'http://localhost:5000/api/tasks',
-          formData,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+          { ...formData, dbType: selectedDbType },
+          { headers: { Authorization: `Bearer ${token}` } }
         );
       }
       closeModal();
@@ -95,13 +88,11 @@ function Dashboard({ token, currentUser, dbType, onLogout }) {
     }
   };
 
-  const handleDelete = async (taskId) => {
+  const handleDelete = async (taskId, dbType) => {
     if (window.confirm('¿Estás seguro de eliminar esta tarea?')) {
       try {
-        await axios.delete(`http://localhost:5000/api/tasks/${taskId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        await axios.delete(`http://localhost:5000/api/tasks/${taskId}/${dbType}`, {
+          headers: { Authorization: `Bearer ${token}` },
         });
         fetchTasks();
       } catch (err) {
@@ -114,18 +105,9 @@ function Dashboard({ token, currentUser, dbType, onLogout }) {
     try {
       const taskId = task._id || task.id;
       await axios.put(
-        `http://localhost:5000/api/tasks/${taskId}`,
-        {
-          title: task.title,
-          description: task.description,
-          dueDate: task.due_date || task.dueDate,
-          completed: !task.completed,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        `http://localhost:5000/api/tasks/${taskId}/${task.dbType}`,
+        { ...task, completed: !task.completed },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       fetchTasks();
     } catch (err) {
@@ -141,12 +123,7 @@ function Dashboard({ token, currentUser, dbType, onLogout }) {
   return (
     <div className="dashboard">
       <div className="dashboard-header">
-        <div>
-          <h1>Mis Tareas</h1>
-          <span className={`db-indicator db-${dbType}`}>
-            {dbType === 'mongodb' ? 'MongoDB' : 'PostgreSQL'}
-          </span>
-        </div>
+        <h1>Mis Tareas</h1>
         <div className="user-info">
           <span>{currentUser.username}</span>
           <button onClick={onLogout} className="btn btn-danger">
@@ -157,11 +134,15 @@ function Dashboard({ token, currentUser, dbType, onLogout }) {
 
       {error && <div className="error-message">{error}</div>}
 
-      <div style={{ marginBottom: '20px' }}>
-        <button onClick={() => openModal()} className="btn btn-primary">
-          + Nueva Tarea
-        </button>
-      </div>
+      <DatabaseSwitch 
+        dbType={selectedDbType} 
+        onDbChange={setSelectedDbType}
+        title="Selecciona la base de datos para tu nueva tarea"
+      />
+
+      <button onClick={() => openModal()} className="btn btn-primary" style={{ margin: '20px 0' }}>
+        + Nueva Tarea
+      </button>
 
       {loading ? (
         <div className="loading">Cargando tareas...</div>
@@ -172,19 +153,19 @@ function Dashboard({ token, currentUser, dbType, onLogout }) {
       ) : (
         <div className="tasks-list">
           {tasks.map((task) => (
-            <div key={task._id || task.id} className={`task-card ${task.completed ? 'completed' : ''}`}>
+            <div key={`${task.dbType}-${task._id || task.id}`} className={`task-card ${task.completed ? 'completed' : ''}`}>
               <div className="task-header">
                 <input
                   type="checkbox"
                   checked={task.completed}
                   onChange={() => toggleComplete(task)}
-                  className="task-checkbox"
                 />
-                <h3 className={task.completed ? 'task-title-completed' : ''}>{task.title}</h3>
+                <h3>{task.title}</h3>
+                <span className={`db-indicator db-${task.dbType}`}>
+                  {task.dbType === 'mongodb' ? 'M' : 'P'}
+                </span>
               </div>
-              {task.description && (
-                <p className="task-description">{task.description}</p>
-              )}
+              {task.description && <p>{task.description}</p>}
               {(task.due_date || task.dueDate) && (
                 <p className="task-date">{formatDate(task.due_date || task.dueDate)}</p>
               )}
@@ -192,7 +173,7 @@ function Dashboard({ token, currentUser, dbType, onLogout }) {
                 <button onClick={() => openModal(task)} className="btn-small btn-edit">
                   Editar
                 </button>
-                <button onClick={() => handleDelete(task._id || task.id)} className="btn-small btn-delete">
+                <button onClick={() => handleDelete(task._id || task.id, task.dbType)} className="btn-small btn-delete">
                   Eliminar
                 </button>
               </div>
@@ -221,7 +202,6 @@ function Dashboard({ token, currentUser, dbType, onLogout }) {
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Detalles de la tarea..."
                   rows="3"
                 />
               </div>
@@ -243,6 +223,11 @@ function Dashboard({ token, currentUser, dbType, onLogout }) {
                     />
                     {' '}Completada
                   </label>
+                </div>
+              )}
+              {!editingTask && (
+                <div className="form-group">
+                  <p>Se guardará en: <strong>{selectedDbType === 'mongodb' ? 'MongoDB' : 'PostgreSQL'}</strong></p>
                 </div>
               )}
               <div className="modal-buttons">

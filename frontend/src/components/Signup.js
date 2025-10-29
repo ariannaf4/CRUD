@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-function Signup({ onSignup, onToggle, dbType }) {
+function Signup({ onSignup, onToggle }) {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -25,10 +25,8 @@ function Signup({ onSignup, onToggle, dbType }) {
         username,
         email,
         password,
-        dbType,
       });
-
-      onSignup(response.data.token, response.data.user, response.data.dbType);
+      onSignup(response.data.token, response.data.user);
     } catch (err) {
       setError(err.response?.data?.message || 'Error al registrarse');
     } finally {

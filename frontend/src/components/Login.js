@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-function Login({ onLogin, onToggle, dbType }) {
+function Login({ onLogin, onToggle }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -16,12 +16,10 @@ function Login({ onLogin, onToggle, dbType }) {
       const response = await axios.post('http://localhost:5000/api/auth/login', {
         email,
         password,
-        dbType,
       });
-
-      onLogin(response.data.token, response.data.user, response.data.dbType);
+      onLogin(response.data.token, response.data.user);
     } catch (err) {
-      setError(err.response?.data?.message || 'credenciales inválidas');
+      setError(err.response?.data?.message || 'Credenciales inválidas');
     } finally {
       setLoading(false);
     }

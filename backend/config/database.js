@@ -23,18 +23,10 @@ const pgPool = new Pool({
 // Crear tablas en PostgreSQL si no existen
 const initPostgresDB = async () => {
   try {
-    // Tabla de usuarios
-    await pgPool.query(`
-      CREATE TABLE IF NOT EXISTS users (
-        id SERIAL PRIMARY KEY,
-        username VARCHAR(255) UNIQUE NOT NULL,
-        email VARCHAR(255) UNIQUE NOT NULL,
-        password VARCHAR(255) NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+    // Eliminar tabla tasks si existe (para quitar la restricción de clave foránea)
+    await pgPool.query(`DROP TABLE IF EXISTS tasks`);
     
-    // Tabla de tareas
+    // Tabla de tareas (sin restricción de clave foránea a users)
     await pgPool.query(`
       CREATE TABLE IF NOT EXISTS tasks (
         id SERIAL PRIMARY KEY,
@@ -42,7 +34,7 @@ const initPostgresDB = async () => {
         description TEXT,
         due_date DATE,
         completed BOOLEAN DEFAULT FALSE,
-        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        user_id INTEGER NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);

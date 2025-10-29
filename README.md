@@ -1,268 +1,83 @@
-# 📝 Lista de Tareas Personal (To-Do List)
+# 📝 Sistema CRUD de Tareas
 
-Sistema completo con API REST en Express.js y frontend en React para gestionar tareas personales. Cada usuario tiene acceso solo a sus propias tareas. Soporta PostgreSQL y MongoDB con cambio dinámico entre bases de datos.
+Sistema simple de gestión de tareas con autenticación JWT. Frontend en React y backend en Express.js con soporte para MongoDB y PostgreSQL.
 
 ## 🚀 Características
 
-- ✅ Autenticación con JWT (Login y Signup)
-- ✅ CRUD completo de tareas personales (Crear, Leer, Actualizar, Eliminar)
-- ✅ Cada usuario ve solo SUS tareas
-- ✅ Campos: Título, Descripción, Fecha límite, Estado (completado/pendiente)
-- ✅ Soporte para PostgreSQL y MongoDB
-- ✅ Switch en el frontend para cambiar entre bases de datos
-- ✅ Interfaz moderna con tarjetas de tareas
-- ✅ Protección de rutas con middleware
+- ✅ Autenticación (Login/Registro)
+- ✅ CRUD de tareas personales
+- ✅ Soporte dual: MongoDB y PostgreSQL
+- ✅ Interfaz moderna con React
+- ✅ Contenedorizado con Docker
 
-## 📋 Requisitos Previos
+## 🔧 Instalación Rápida
 
-### Opción 1: Con Docker (Recomendado)
-- Docker Desktop instalado
-- Docker Compose
+### Con Docker (Recomendado)
 
-### Opción 2: Sin Docker
-- Node.js (v14 o superior)
-- PostgreSQL (v12 o superior)
-- MongoDB (v4.4 o superior)
-- npm o yarn
-
-## 🔧 Instalación
-
-### 🐳 Opción 1: Con Docker (Recomendado)
-
-**La forma más fácil de ejecutar el proyecto:**
-
-1. Asegúrate de tener Docker Desktop instalado y corriendo
-
-2. Desde la raíz del proyecto, ejecuta:
 ```bash
+# Clonar el repositorio
+git clone <url-del-repo>
+cd CRUD
+
+# Levantar todos los servicios
 docker-compose up --build
 ```
 
-3. ¡Eso es todo! El sistema completo estará disponible en:
-   - Frontend: http://localhost:3000
-   - Backend: http://localhost:5000
-   - PostgreSQL: localhost:5432
-   - MongoDB: localhost:27017
+**URLs disponibles:**
+- Frontend: http://localhost:3000
+- Backend: http://localhost:5000
 
-**Comandos útiles de Docker:**
+### Sin Docker
 
-```bash
-# Iniciar todos los servicios
-docker-compose up
-
-# Iniciar en segundo plano
-docker-compose up -d
-
-# Ver logs
-docker-compose logs -f
-
-# Detener todos los servicios
-docker-compose down
-
-# Detener y eliminar volúmenes (limpia las bases de datos)
-docker-compose down -v
-
-# Reconstruir las imágenes
-docker-compose up --build
-```
-
-### 💻 Opción 2: Sin Docker (Instalación Manual)
-
-#### Backend
-
-1. Navega a la carpeta backend:
+1. **Backend:**
 ```bash
 cd backend
-```
-
-2. Instala las dependencias:
-```bash
 npm install
-```
-
-3. Configura las variables de entorno en el archivo `.env`:
-```env
-PORT=5000
-JWT_SECRET=tu_super_secreto_jwt_cambiame_en_produccion
-
-# PostgreSQL
-PG_HOST=localhost
-PG_PORT=5432
-PG_DATABASE=crud_db
-PG_USER=postgres
-PG_PASSWORD=tu_contraseña
-
-# MongoDB
-MONGO_URI=mongodb://localhost:27017/crud_db
-```
-
-4. Asegúrate de que PostgreSQL y MongoDB estén corriendo
-
-5. Inicia el servidor:
-```bash
+# Configurar .env con las credenciales de BD
 npm start
-# o para desarrollo con nodemon
-npm run dev
 ```
 
-#### Frontend
-
-1. Navega a la carpeta frontend:
+2. **Frontend:**
 ```bash
 cd frontend
-```
-
-2. Instala las dependencias:
-```bash
 npm install
-```
-
-3. Inicia la aplicación:
-```bash
 npm start
 ```
-
-La aplicación se abrirá en `http://localhost:3000`
 
 ## 🎯 Uso
 
-1. **Seleccionar Base de Datos**: Al abrir la aplicación, verás un switch para elegir entre MongoDB o PostgreSQL
+1. **Registrarse/Iniciar sesión** en la aplicación
+2. **Seleccionar base de datos** (MongoDB o PostgreSQL) para nuevas tareas
+3. **Crear, editar y eliminar tareas** según necesites
+4. **Marcar tareas como completadas**
 
-2. **Registro**: Crea una nueva cuenta con usuario, email y contraseña
+## �️ Tecnologías
 
-3. **Login**: Inicia sesión con tus credenciales
+**Backend:** Express.js, JWT, MongoDB, PostgreSQL  
+**Frontend:** React, Axios  
+**DevOps:** Docker, Docker Compose
 
-4. **Gestión de Tareas**: Una vez autenticado, podrás:
-   - ➕ **Crear nuevas tareas** con título, descripción y fecha límite
-   - ✅ **Marcar tareas como completadas** con un simple click
-   - ✏️ **Editar tus tareas** en cualquier momento
-   - 🗑️ **Eliminar tareas** que ya no necesites
-   - 👁️ **Ver solo TUS tareas** (las tareas son privadas para cada usuario)
-   - 🔄 Ver qué base de datos estás usando
-
-## 📁 Estructura del Proyecto
+## 📁 Estructura
 
 ```
 CRUD/
-├── backend/
-│   ├── config/
-│   │   └── database.js          # Configuración de bases de datos
-│   ├── middleware/
-│   │   └── auth.js              # Middleware de autenticación JWT
-│   ├── models/
-│   │   ├── userMongo.js         # Modelo de usuario para MongoDB
-│   │   ├── userPostgres.js      # Modelo de usuario para PostgreSQL
-│   │   ├── taskMongo.js         # Modelo de tarea para MongoDB
-│   │   └── taskPostgres.js      # Modelo de tarea para PostgreSQL
-│   ├── routes/
-│   │   ├── auth.js              # Rutas de autenticación
-│   │   └── tasks.js             # Rutas CRUD de tareas
-│   ├── .env                     # Variables de entorno
-│   ├── .dockerignore            # Archivos ignorados por Docker
-│   ├── Dockerfile               # Configuración Docker del backend
-│   ├── package.json
-│   └── server.js                # Punto de entrada del servidor
-│
-├── frontend/
-│   ├── public/
-│   │   └── index.html
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── Dashboard.js        # Panel de tareas con CRUD
-│   │   │   ├── DatabaseSwitch.js   # Switch de bases de datos
-│   │   │   ├── DatabaseSwitch.css
-│   │   │   ├── Login.js            # Componente de login
-│   │   │   └── Signup.js           # Componente de registro
-│   │   ├── App.js
-│   │   ├── App.css
-│   │   ├── index.js
-│   │   └── index.css
-│   ├── .dockerignore            # Archivos ignorados por Docker
-│   ├── Dockerfile               # Configuración Docker del frontend
-│   └── package.json
-│
-└── docker-compose.yml           # Orquestación de todos los servicios
+├── backend/          # API REST
+├── frontend/         # App React
+└── docker-compose.yml
 ```
 
-## 🔐 API Endpoints
+## 🔐 API Principal
 
-### Autenticación
-
-- `POST /api/auth/signup` - Registrar nuevo usuario
-  ```json
-  {
-    "username": "usuario123",
-    "email": "user@email.com",
-    "password": "password123",
-    "dbType": "mongodb" // o "postgres"
-  }
-  ```
-
-- `POST /api/auth/login` - Iniciar sesión
-  ```json
-  {
-    "email": "user@email.com",
-    "password": "password123",
-    "dbType": "mongodb" // o "postgres"
-  }
-  ```
-
-### Tareas (Requieren autenticación)
-
-- `GET /api/tasks` - Obtener todas las tareas del usuario
-- `POST /api/tasks` - Crear una nueva tarea
-  ```json
-  {
-    "title": "Comprar leche",
-    "description": "Ir al supermercado",
-    "dueDate": "2025-10-30"
-  }
-  ```
-- `PUT /api/tasks/:id` - Actualizar una tarea
-- `DELETE /api/tasks/:id` - Eliminar una tarea
-
-**Header requerido:**
-```
-Authorization: Bearer <token>
-```
-
-## 🛠️ Tecnologías Utilizadas
-
-### Backend
-- Express.js - Framework web
-- JWT - Autenticación
-- bcryptjs - Hash de contraseñas
-- Mongoose - ODM para MongoDB
-- pg - Cliente PostgreSQL
-- dotenv - Variables de entorno
-- cors - Middleware CORS
-
-### Frontend
-- React - Librería UI
-- Axios - Cliente HTTP
-- CSS3 - Estilos
-
-### DevOps
-- Docker - Contenedorización
-- Docker Compose - Orquestación de servicios
-- PostgreSQL 15 (Alpine)
-- MongoDB 7.0
+- `POST /api/auth/signup` - Registro
+- `POST /api/auth/login` - Login
+- `GET /api/tasks` - Ver tareas
+- `POST /api/tasks` - Crear tarea
+- `PUT /api/tasks/:id/:dbType` - Actualizar
+- `DELETE /api/tasks/:id/:dbType` - Eliminar
 
 ## 📝 Notas
 
-- **Privacidad**: Cada usuario solo puede ver y gestionar sus propias tareas
-- El switch de base de datos permite cambiar entre PostgreSQL y MongoDB
-- Cada usuario se registra en la base de datos seleccionada
-- El token JWT almacena qué base de datos está usando el usuario
-- Las contraseñas se hashean con bcrypt antes de almacenarse
-- Los tokens expiran en 24 horas
-- Las tareas se vinculan automáticamente al usuario autenticado
-- Validaciones simples: solo el título es obligatorio
-
-## 🤝 Contribuciones
-
-Las contribuciones son bienvenidas. Por favor, abre un issue primero para discutir los cambios que te gustaría hacer.
-
-## 📄 Licencia
-
-ISC
+- Cada usuario solo ve sus propias tareas
+- Los usuarios se almacenan en MongoDB
+- Las tareas se pueden crear en MongoDB o PostgreSQL
+- Tokens JWT válidos por 24 horas

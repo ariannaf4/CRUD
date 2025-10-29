@@ -1,76 +1,97 @@
 .database-switch {
-  margin-bottom: 30px;
+  margin-bottom: 25px;
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .switch-header h3 {
   text-align: center;
   color: #333;
-  margin-bottom: 20px;
-  font-size: 18px;
+  margin-bottom: 15px;
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .switch-container {
   display: flex;
-  gap: 15px;
+  gap: 12px;
   margin-bottom: 15px;
+  justify-content: center;
 }
 
 .switch-option {
   flex: 1;
-  padding: 15px;
-  border: 3px solid #e0e0e0;
-  border-radius: 10px;
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
   background: white;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  max-width: 120px;
 }
 
 .switch-option:hover {
   border-color: #667eea;
   transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
 }
 
 .switch-option.active {
   border-color: #667eea;
   box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+  background: linear-gradient(135deg, #f8f9ff, #ffffff);
 }
 
 .switch-option.mongodb.active {
   border-color: #47a248;
   box-shadow: 0 5px 20px rgba(71, 162, 72, 0.3);
+  background: linear-gradient(135deg, #f0fff0, #ffffff);
+}
+
+.switch-option.mongodb .db-icon {
+  color: #47a248;
 }
 
 .switch-option.postgres.active {
   border-color: #336791;
   box-shadow: 0 5px 20px rgba(51, 103, 145, 0.3);
+  background: linear-gradient(135deg, #f0f8ff, #ffffff);
+}
+
+.switch-option.postgres .db-icon {
+  color: #336791;
 }
 
 .db-icon {
-  font-size: 32px;
+  font-size: 24px;
   font-weight: bold;
   color: #667eea;
+  transition: color 0.3s ease;
 }
 
 .db-name {
   font-weight: 600;
   color: #333;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .current-db {
   text-align: center;
   color: #666;
-  font-size: 14px;
+  font-size: 13px;
   padding: 10px;
-  background: #f5f5f5;
-  border-radius: 8px;
+  background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+  border-radius: 6px;
+  border: 1px solid #e0e6ed;
 }
 
 .current-db strong {
-  color: #667eea;
-  font-weight: 600;
+  color: #333;
+  font-weight: 700;
 }

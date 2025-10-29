@@ -3,60 +3,37 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const UserMongo = require('../models/userMongo');
-const UserPostgres = require('../models/userPostgres');
 
 // Registro de usuario
 router.post('/signup', async (req, res) => {
   try {
-    const { username, email, password, dbType } = req.body;
+    const { username, email, password } = req.body;
 
     // Validación básica
-    if (!username || !email || !password || !dbType) {
+    if (!username || !email || !password) {
       return res.status(400).json({ message: 'Todos los campos son requeridos' });
     }
 
-    if (!['postgres', 'mongodb'].includes(dbType)) {
-      return res.status(400).json({ message: 'Tipo de base de datos no válido' });
+    // Verificar si el usuario ya existe
+    const existingUser = await UserMongo.findOne({ $or: [{ email }, { username }] });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Usuario o email ya existe' });
     }
 
     // Hash de la contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    let user;
-    let userId;
-
-    if (dbType === 'mongodb') {
-      // Verificar si el usuario ya existe
-      const existingUser = await UserMongo.findOne({ $or: [{ email }, { username }] });
-      if (existingUser) {
-        return res.status(400).json({ message: 'Usuario o email ya existe' });
-      }
-
-      // Crear usuario en MongoDB
-      user = new UserMongo({
-        username,
-        email,
-        password: hashedPassword,
-      });
-      await user.save();
-      userId = user._id;
-    } else {
-      // Verificar si el usuario ya existe
-      const existingEmail = await UserPostgres.findByEmail(email);
-      const existingUsername = await UserPostgres.findByUsername(username);
-      
-      if (existingEmail || existingUsername) {
-        return res.status(400).json({ message: 'Usuario o email ya existe' });
-      }
-
-      // Crear usuario en PostgreSQL
-      user = await UserPostgres.create(username, email, hashedPassword);
-      userId = user.id;
-    }
+    // Crear usuario solo en MongoDB
+    const user = new UserMongo({
+      username,
+      email,
+      password: hashedPassword,
+    });
+    await user.save();
 
     // Generar token JWT
     const token = jwt.sign(
-      { userId, dbType },
+      { userId: user._id },
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
@@ -65,11 +42,10 @@ router.post('/signup', async (req, res) => {
       message: 'Usuario registrado exitosamente',
       token,
       user: {
-        id: userId,
+        id: user._id,
         username: user.username,
         email: user.email,
       },
-      dbType,
     });
   } catch (error) {
     console.error(error);
@@ -80,34 +56,17 @@ router.post('/signup', async (req, res) => {
 // Login de usuario
 router.post('/login', async (req, res) => {
   try {
-    const { email, password, dbType } = req.body;
+    const { email, password } = req.body;
 
     // Validación básica
-    if (!email || !password || !dbType) {
+    if (!email || !password) {
       return res.status(400).json({ message: 'Todos los campos son requeridos' });
     }
 
-    if (!['postgres', 'mongodb'].includes(dbType)) {
-      return res.status(400).json({ message: 'Tipo de base de datos no válido' });
-    }
-
-    let user;
-    let userId;
-
-    if (dbType === 'mongodb') {
-      // Buscar usuario en MongoDB
-      user = await UserMongo.findOne({ email });
-      if (!user) {
-        return res.status(400).json({ message: 'Credenciales inválidas' });
-      }
-      userId = user._id;
-    } else {
-      // Buscar usuario en PostgreSQL
-      user = await UserPostgres.findByEmail(email);
-      if (!user) {
-        return res.status(400).json({ message: 'Credenciales inválidas' });
-      }
-      userId = user.id;
+    // Buscar usuario solo en MongoDB
+    const user = await UserMongo.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: 'Credenciales inválidas' });
     }
 
     // Verificar contraseña
@@ -118,7 +77,7 @@ router.post('/login', async (req, res) => {
 
     // Generar token JWT
     const token = jwt.sign(
-      { userId, dbType },
+      { userId: user._id },
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
@@ -127,11 +86,10 @@ router.post('/login', async (req, res) => {
       message: 'Login exitoso',
       token,
       user: {
-        id: userId,
+        id: user._id,
         username: user.username,
         email: user.email,
       },
-      dbType,
     });
   } catch (error) {
     console.error(error);

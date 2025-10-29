@@ -1,12 +1,10 @@
 import React from 'react';
 import './DatabaseSwitch.css';
 
-function DatabaseSwitch({ dbType, onDbChange }) {
+function DatabaseSwitch({ dbType, onDbChange, title = "Selecciona la Base de Datos" }) {
   return (
     <div className="database-switch">
-      <div className="switch-header">
-        <h3>Selecciona la Base de Datos</h3>
-      </div>
+      <h3>{title}</h3>
       <div className="switch-container">
         <button
           className={`switch-option ${dbType === 'mongodb' ? 'active mongodb' : ''}`}
@@ -22,9 +20,6 @@ function DatabaseSwitch({ dbType, onDbChange }) {
           <span className="db-icon">P</span>
           <span className="db-name">PostgreSQL</span>
         </button>
-      </div>
-      <div className="current-db">
-        Base de datos actual: <strong>{dbType === 'mongodb' ? 'MongoDB' : 'PostgreSQL'}</strong>
       </div>
     </div>
   );
