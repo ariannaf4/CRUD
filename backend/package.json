@@ -1,7 +1,7 @@
 {
   "name": "crud-backend",
   "version": "1.0.0",
-  "description": "API REST con Express, PostgreSQL y MongoDB",
+  "description": "GraphQL API con MongoDB",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -11,14 +11,15 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.18.2",
+    "@apollo/server": "^5.1.0",
+    "@as-integrations/express4": "^1.1.2",
+    "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "graphql": "^16.12.0",
     "jsonwebtoken": "^9.0.2",
-    "bcryptjs": "^2.4.3",
-    "mongoose": "^8.0.0",
-    "pg": "^8.11.3",
-    "pg-hstore": "^2.3.4"
+    "mongoose": "^8.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"

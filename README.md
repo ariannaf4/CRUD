@@ -1,83 +1,66 @@
-# 📝 Sistema CRUD de Tareas
+# CRUD App - GraphQL + MongoDB
 
-Sistema simple de gestión de tareas con autenticación JWT. Frontend en React y backend en Express.js con soporte para MongoDB y PostgreSQL.
+Una aplicación CRUD simple usando GraphQL y MongoDB.
 
-## 🚀 Características
+## 🚀 Tecnologías
 
-- ✅ Autenticación (Login/Registro)
-- ✅ CRUD de tareas personales
-- ✅ Soporte dual: MongoDB y PostgreSQL
-- ✅ Interfaz moderna con React
-- ✅ Contenedorizado con Docker
+### Backend
+- **GraphQL** con Apollo Server
+- **MongoDB** para persistencia
+- **JWT** para autenticación
+- **Express.js** como servidor
 
-## 🔧 Instalación Rápida
+### Frontend
+- **React.js**
+- **GraphQL** para todas las operaciones
+- **CSS3** para estilos
+
+## � Instalación
 
 ### Con Docker (Recomendado)
-
 ```bash
-# Clonar el repositorio
-git clone <url-del-repo>
+# Clonar repositorio
+git clone <repository-url>
 cd CRUD
 
-# Levantar todos los servicios
+# Iniciar con Docker
 docker-compose up --build
 ```
 
-**URLs disponibles:**
-- Frontend: http://localhost:3000
-- Backend: http://localhost:5000
-
-### Sin Docker
-
-1. **Backend:**
+### Desarrollo Local
 ```bash
+# Backend
 cd backend
 npm install
-# Configurar .env con las credenciales de BD
 npm start
-```
 
-2. **Frontend:**
-```bash
+# Frontend (nueva terminal)
 cd frontend
 npm install
 npm start
+
+# MongoDB (con Docker)
+docker-compose up mongodb -d
 ```
+
+## 🔗 URLs
+
+- **Frontend:** http://localhost:3000
+- **Backend GraphQL:** http://localhost:5000/graphql
+- **MongoDB:** localhost:27017
+
+## � Funcionalidades
+
+- ✅ Registro y login de usuarios
+- ✅ Crear, leer, actualizar y eliminar tareas
+- ✅ Autenticación JWT
+- ✅ Interfaz React limpia y moderna
+- ✅ API GraphQL completa
 
 ## 🎯 Uso
 
-1. **Registrarse/Iniciar sesión** en la aplicación
-2. **Seleccionar base de datos** (MongoDB o PostgreSQL) para nuevas tareas
-3. **Crear, editar y eliminar tareas** según necesites
-4. **Marcar tareas como completadas**
+1. Abrir http://localhost:3000
+2. Registrarte o iniciar sesión
+3. Crear y gestionar tus tareas
 
-## �️ Tecnologías
-
-**Backend:** Express.js, JWT, MongoDB, PostgreSQL  
-**Frontend:** React, Axios  
-**DevOps:** Docker, Docker Compose
-
-## 📁 Estructura
-
-```
-CRUD/
-├── backend/          # API REST
-├── frontend/         # App React
-└── docker-compose.yml
-```
-
-## 🔐 API Principal
-
-- `POST /api/auth/signup` - Registro
-- `POST /api/auth/login` - Login
-- `GET /api/tasks` - Ver tareas
-- `POST /api/tasks` - Crear tarea
-- `PUT /api/tasks/:id/:dbType` - Actualizar
-- `DELETE /api/tasks/:id/:dbType` - Eliminar
-
-## 📝 Notas
-
-- Cada usuario solo ve sus propias tareas
-- Los usuarios se almacenan en MongoDB
-- Las tareas se pueden crear en MongoDB o PostgreSQL
-- Tokens JWT válidos por 24 horas
+¡Simple y funcional! 🎉

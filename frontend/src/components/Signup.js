@@ -21,14 +21,37 @@ function Signup({ onSignup, onToggle }) {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/signup', {
-        username,
-        email,
-        password,
+      const response = await axios.post('http://localhost:5000/graphql', {
+        query: `
+          mutation Signup($username: String!, $email: String!, $password: String!) {
+            signup(username: $username, email: $email, password: $password) {
+              token
+              user {
+                id
+                username
+                email
+              }
+            }
+          }
+        `,
+        variables: {
+          username,
+          email,
+          password
+        }
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
-      onSignup(response.data.token, response.data.user);
+
+      if (response.data.errors) {
+        setError(response.data.errors[0].message);
+      } else {
+        onSignup(response.data.data.signup.token, response.data.data.signup.user);
+      }
     } catch (err) {
-      setError(err.response?.data?.message || 'Error al registrarse');
+      setError(err.response?.data?.message || 'Error de conexión');
     } finally {
       setLoading(false);
     }

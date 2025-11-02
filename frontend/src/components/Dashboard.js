@@ -1,14 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import DatabaseSwitch from './DatabaseSwitch';
+import React, { useState } from 'react';
+import { useTaskAPI } from '../hooks/useTaskAPI';
 
 function Dashboard({ token, currentUser, onLogout }) {
-  const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
-  const [selectedDbType, setSelectedDbType] = useState('mongodb');
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -16,22 +11,45 @@ function Dashboard({ token, currentUser, onLogout }) {
     completed: false,
   });
 
-  useEffect(() => {
-    fetchTasks();
-  }, [token]);
+  // Hook para manejar tareas
+  const {
+    tasks,
+    loading,
+    error,
+    createTask,
+    updateTask,
+    deleteTask
+  } = useTaskAPI(token);
 
-  const fetchTasks = async () => {
+  const [uiError, setUiError] = useState('');
+
+  // Formatear fecha para mostrar (sin zona horaria)
+  const formatDate = (date) => {
+    if (!date) return '';
     try {
-      setLoading(true);
-      const response = await axios.get('http://localhost:5000/api/tasks', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setTasks(response.data.tasks);
-      setError('');
-    } catch (err) {
-      setError(err.response?.data?.message || 'Error al cargar tareas');
-    } finally {
-      setLoading(false);
+      // Crear fecha local sin conversión de zona horaria
+      const dateObj = new Date(date + 'T00:00:00');
+      return dateObj.toLocaleDateString('es-ES');
+    } catch (error) {
+      return '';
+    }
+  };
+
+  // Formatear fecha para input (YYYY-MM-DD)
+  const formatDateForInput = (date) => {
+    if (!date) return '';
+    try {
+      // Si ya está en formato YYYY-MM-DD, devolverlo tal como está
+      if (typeof date === 'string' && date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        return date;
+      }
+      // Si es una fecha ISO, extraer solo la parte de la fecha
+      if (typeof date === 'string' && date.includes('T')) {
+        return date.split('T')[0];
+      }
+      return new Date(date).toISOString().split('T')[0];
+    } catch (error) {
+      return '';
     }
   };
 
@@ -41,7 +59,7 @@ function Dashboard({ token, currentUser, onLogout }) {
       setFormData({
         title: task.title,
         description: task.description || '',
-        dueDate: task.due_date || task.dueDate || '',
+        dueDate: formatDateForInput(task.dueDate),
         completed: task.completed,
       });
     } else {
@@ -55,69 +73,47 @@ function Dashboard({ token, currentUser, onLogout }) {
     setShowModal(false);
     setEditingTask(null);
     setFormData({ title: '', description: '', dueDate: '', completed: false });
+    setUiError('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!formData.title.trim()) {
-      setError('El título es requerido');
+      setUiError('El título es requerido');
       return;
     }
 
     try {
       if (editingTask) {
-        const taskId = editingTask._id || editingTask.id;
-        const dbType = editingTask.dbType;
-        await axios.put(
-          `http://localhost:5000/api/tasks/${taskId}/${dbType}`,
-          formData,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        await updateTask(editingTask.id, formData);
       } else {
-        await axios.post(
-          'http://localhost:5000/api/tasks',
-          { ...formData, dbType: selectedDbType },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        await createTask(formData);
       }
       closeModal();
-      fetchTasks();
     } catch (err) {
-      setError(err.response?.data?.message || 'Error al guardar tarea');
+      setUiError(err.message);
     }
   };
 
-  const handleDelete = async (taskId, dbType) => {
+  const handleDelete = async (taskId) => {
     if (window.confirm('¿Estás seguro de eliminar esta tarea?')) {
       try {
-        await axios.delete(`http://localhost:5000/api/tasks/${taskId}/${dbType}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        fetchTasks();
+        await deleteTask(taskId);
+        setUiError('');
       } catch (err) {
-        setError(err.response?.data?.message || 'Error al eliminar tarea');
+        setUiError(err.message);
       }
     }
   };
 
   const toggleComplete = async (task) => {
     try {
-      const taskId = task._id || task.id;
-      await axios.put(
-        `http://localhost:5000/api/tasks/${taskId}/${task.dbType}`,
-        { ...task, completed: !task.completed },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      fetchTasks();
+      await updateTask(task.id, { completed: !task.completed });
+      setUiError('');
     } catch (err) {
-      setError(err.response?.data?.message || 'Error al actualizar tarea');
+      setUiError(err.message);
     }
-  };
-
-  const formatDate = (date) => {
-    if (!date) return '';
-    return new Date(date).toLocaleDateString('es-ES');
   };
 
   return (
@@ -132,15 +128,11 @@ function Dashboard({ token, currentUser, onLogout }) {
         </div>
       </div>
 
-      {error && <div className="error-message">{error}</div>}
+      {(error || uiError) && (
+        <div className="error-message">{error || uiError}</div>
+      )}
 
-      <DatabaseSwitch 
-        dbType={selectedDbType} 
-        onDbChange={setSelectedDbType}
-        title="Selecciona la base de datos para tu nueva tarea"
-      />
-
-      <button onClick={() => openModal()} className="btn btn-primary" style={{ margin: '20px 0' }}>
+      <button onClick={() => openModal()} className="create-task-button">
         + Nueva Tarea
       </button>
 
@@ -153,7 +145,7 @@ function Dashboard({ token, currentUser, onLogout }) {
       ) : (
         <div className="tasks-list">
           {tasks.map((task) => (
-            <div key={`${task.dbType}-${task._id || task.id}`} className={`task-card ${task.completed ? 'completed' : ''}`}>
+            <div key={task.id} className={`task-card ${task.completed ? 'completed' : ''}`}>
               <div className="task-header">
                 <input
                   type="checkbox"
@@ -161,19 +153,18 @@ function Dashboard({ token, currentUser, onLogout }) {
                   onChange={() => toggleComplete(task)}
                 />
                 <h3>{task.title}</h3>
-                <span className={`db-indicator db-${task.dbType}`}>
-                  {task.dbType === 'mongodb' ? 'M' : 'P'}
-                </span>
               </div>
               {task.description && <p>{task.description}</p>}
-              {(task.due_date || task.dueDate) && (
-                <p className="task-date">{formatDate(task.due_date || task.dueDate)}</p>
+              {task.dueDate && (
+                <p className="task-date">
+                  Vence: {formatDate(task.dueDate)}
+                </p>
               )}
               <div className="task-actions">
                 <button onClick={() => openModal(task)} className="btn-small btn-edit">
                   Editar
                 </button>
-                <button onClick={() => handleDelete(task._id || task.id, task.dbType)} className="btn-small btn-delete">
+                <button onClick={() => handleDelete(task.id)} className="btn-small btn-delete">
                   Eliminar
                 </button>
               </div>
@@ -186,6 +177,7 @@ function Dashboard({ token, currentUser, onLogout }) {
         <div className="modal">
           <div className="modal-content">
             <h3>{editingTask ? 'Editar Tarea' : 'Nueva Tarea'}</h3>
+            {uiError && <div className="error-message">{uiError}</div>}
             <form onSubmit={handleSubmit}>
               <div className="form-group">
                 <label>Título *</label>
@@ -203,6 +195,7 @@ function Dashboard({ token, currentUser, onLogout }) {
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   rows="3"
+                  placeholder="Descripción opcional..."
                 />
               </div>
               <div className="form-group">
@@ -223,11 +216,6 @@ function Dashboard({ token, currentUser, onLogout }) {
                     />
                     {' '}Completada
                   </label>
-                </div>
-              )}
-              {!editingTask && (
-                <div className="form-group">
-                  <p>Se guardará en: <strong>{selectedDbType === 'mongodb' ? 'MongoDB' : 'PostgreSQL'}</strong></p>
                 </div>
               )}
               <div className="modal-buttons">

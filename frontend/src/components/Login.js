@@ -13,13 +13,36 @@ function Login({ onLogin, onToggle }) {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', {
-        email,
-        password,
+      const response = await axios.post('http://localhost:5000/graphql', {
+        query: `
+          mutation Login($email: String!, $password: String!) {
+            login(email: $email, password: $password) {
+              token
+              user {
+                id
+                username
+                email
+              }
+            }
+          }
+        `,
+        variables: {
+          email,
+          password
+        }
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
-      onLogin(response.data.token, response.data.user);
+
+      if (response.data.errors) {
+        setError(response.data.errors[0].message);
+      } else {
+        onLogin(response.data.data.login.token, response.data.data.login.user);
+      }
     } catch (err) {
-      setError(err.response?.data?.message || 'Credenciales inválidas');
+      setError(err.response?.data?.message || 'Error de conexión');
     } finally {
       setLoading(false);
     }
